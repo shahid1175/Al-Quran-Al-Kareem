@@ -1,0 +1,6 @@
+{
+  "name": "Al-Quran Al-Kareem",
+  "description": "A comprehensive Quran application featuring multi-language translations, famous recitations, AI-powered grammar analysis, Tajweed learning, and memorization tracking.",
+  "requestFramePermissions": ["geolocation", "microphone"],
+  "majorCapabilities": []
+}

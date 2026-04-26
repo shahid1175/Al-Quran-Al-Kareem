@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Libre Baskerville", serif;
+  --font-arabic: "Amiri", serif;
+}
+
+:root {
+  --primary: #7D8461;
+  --primary-light: #F4F1EA;
+  --accent: #C89B7B;
+  --bg-main: #FDFCF9;
+  --text-main: #3E3D39;
+  --border-subtle: #E6E2D8;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+.arabic-text {
+  font-family: var(--font-arabic);
+  direction: rtl;
+}
+
+.natural-card {
+  background: white;
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+}
