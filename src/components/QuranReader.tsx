@@ -48,6 +48,8 @@ export default function QuranReader() {
   const [recordingId, setRecordingId] = useState<number | null>(null);
   const [analyzingRecitationId, setAnalyzingRecitationId] = useState<number | null>(null);
   const [recitationResult, setRecitationResult] = useState<any | null>(null);
+  const [fetchingGuideId, setFetchingGuideId] = useState<number | null>(null);
+  const [recitationGuide, setRecitationGuide] = useState<any | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -138,6 +140,14 @@ export default function QuranReader() {
     const result = await AIService.analyzeAyah(ayah.text, ayah.translation || '');
     setAnalysisResult({ id: ayah.number, ...result });
     setAnalyzingId(null);
+  };
+  
+  const getPracticeGuide = async (ayah: Ayah) => {
+    setFetchingGuideId(ayah.number);
+    setRecitationGuide(null);
+    const result = await AIService.getRecitationGuide(ayah.text);
+    setRecitationGuide({ id: ayah.number, ...result });
+    setFetchingGuideId(null);
   };
 
   const startRecording = async (ayahId: number) => {
@@ -291,9 +301,19 @@ export default function QuranReader() {
                       w-10 h-10 flex items-center justify-center rounded-full transition-all border border-[#E6E2D8] bg-white
                       ${analyzingId === ayah.number ? 'bg-[#F4F1EA]' : 'hover:bg-[#F4F1EA] text-[#C89B7B]'}
                     `}
-                    title="Find mistakes & analyze"
+                    title="Verse Analysis"
                   >
                     {analyzingId === ayah.number ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); getPracticeGuide(ayah); }}
+                    className={`
+                      w-10 h-10 flex items-center justify-center rounded-full transition-all border border-[#E6E2D8] bg-white
+                      ${fetchingGuideId === ayah.number ? 'bg-[#F4F1EA]' : 'hover:bg-[#F4F1EA] text-blue-500'}
+                    `}
+                    title="AI Correction Practice Guide"
+                  >
+                    {fetchingGuideId === ayah.number ? <Loader2 size={18} className="animate-spin" /> : <Info size={18} />}
                   </button>
                   <button 
                     onClick={(e) => { 
@@ -407,6 +427,73 @@ export default function QuranReader() {
               </AnimatePresence>
 
               <AnimatePresence>
+                {recitationGuide && recitationGuide.id === ayah.number && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden mt-4"
+                  >
+                    <div className="bg-blue-50/50 border border-blue-100 rounded-3xl p-6 relative">
+                      <div className="absolute -top-3 left-6 bg-blue-500 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-sm">Practice Guide</div>
+                      
+                      <div className="flex justify-end mb-4">
+                        <button onClick={() => setRecitationGuide(null)} className="text-blue-300 hover:text-blue-600">
+                          <X size={16} />
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h6 className="text-[10px] font-bold text-blue-700 uppercase tracking-widest flex items-center">
+                            <AlertCircle size={12} className="mr-2" />
+                            Common Pitfalls
+                          </h6>
+                          <div className="space-y-2">
+                            {recitationGuide.commonMistakes.map((m: any, idx: number) => (
+                              <div key={idx} className="bg-white/60 p-3 rounded-xl border border-blue-100 text-xs">
+                                <p className="font-bold text-blue-900">{m.pitfall}</p>
+                                <p className="text-blue-700/70 mt-1">{m.howToAvoid}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <h6 className="text-[10px] font-bold text-blue-700 uppercase tracking-widest flex items-center">
+                            <BookOpen size={12} className="mr-2" />
+                            Practice Drills
+                          </h6>
+                          <ul className="space-y-2">
+                            {recitationGuide.practiceDrills.map((drill: string, idx: number) => (
+                              <li key={idx} className="bg-white/40 p-2 rounded-lg text-xs text-blue-800 border border-blue-50 flex items-center gap-2">
+                                <div className="w-4 h-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold shrink-0">{idx + 1}</div>
+                                {drill}
+                              </li>
+                            ))}
+                          </ul>
+                          
+                          {recitationGuide.focusWords.length > 0 && (
+                            <div className="mt-4">
+                              <h6 className="text-[10px] font-bold text-blue-700 uppercase tracking-widest mb-2">Focus Words</h6>
+                              <div className="flex flex-wrap gap-2">
+                                {recitationGuide.focusWords.map((f: any, idx: number) => (
+                                  <div key={idx} className="bg-white px-2 py-1 rounded border border-blue-100 group relative">
+                                    <span className="font-arabic text-sm text-blue-900 cursor-help">{f.word}</span>
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 p-2 bg-blue-600 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                                      {f.reason}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
                 {recitationResult && recitationResult.id === ayah.number && (
                   <motion.div 
                     initial={{ height: 0, opacity: 0 }}

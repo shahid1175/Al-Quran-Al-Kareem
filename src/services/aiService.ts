@@ -48,6 +48,44 @@ export const AIService = {
     }
   },
 
+  async getRecitationGuide(arabicText: string) {
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+
+    const prompt = `You are a professional Tajweed teacher. Analyze this Quranic text: "${arabicText}".
+    
+    TASKS:
+    1. Identify the most common pronunciation mistakes students make with THIS specific verse.
+    2. Provide specific "Practice Drills" for difficult transitions or letters in this verse.
+    3. Highlight which words require extra attention to avoid skipping or merging incorrectly.
+    
+    OUTPUT SPECIFICATION:
+    Return ONLY a JSON object with these EXACT keys:
+    - "commonMistakes": [ { "pitfall": "string", "howToAvoid": "string" } ]
+    - "practiceDrills": [ "string" ]
+    - "focusWords": [ { "word": "string", "reason": "string" } ]
+
+    DO NOT include any text before or after the JSON.`;
+
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+        }
+      });
+
+      return safeJsonParse(response.text);
+    } catch (error) {
+      console.error("Recitation Guide Error:", error);
+      return { 
+        commonMistakes: [],
+        practiceDrills: ["Focus on clear pronunciation of each letter."],
+        focusWords: []
+      };
+    }
+  },
+
   async analyzeRecitation(audioBase64: string, arabicText: string, mimeType: string = "audio/webm") {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
