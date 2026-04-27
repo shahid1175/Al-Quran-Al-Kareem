@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Calendar as CalendarIcon, RotateCcw, Plus, Calculator, Heart, Wind, Eraser } from 'lucide-react';
+import IslamicCalendar from './IslamicCalendar';
+import NamesOfAllah from './NamesOfAllah';
+import Duas from './Duas';
+import FeaturesModule from './FeaturesModule';
+import RecitationHistory from './RecitationHistory';
 
 export default function IslamicTools() {
   const [tasbihCount, setTasbihCount] = useState(0);
   const [tasbihTarget, setTasbihTarget] = useState(33);
   const [tasbihPhrase, setTasbihPhrase] = useState("SubhanAllah");
-  const [activeTab, setActiveTab] = useState<'tasbih' | 'calendar' | 'cleaner'>('tasbih');
+  const [activeTab, setActiveTab] = useState<'tasbih' | 'calendar' | 'names' | 'duas' | 'cleaner' | 'features' | 'history'>('tasbih');
 
   const phrases = [
     { text: "SubhanAllah", translation: "Glory be to Allah" },
@@ -36,22 +41,52 @@ export default function IslamicTools() {
         <p className="text-[#A49D8B] mt-2">Spiritual utilities for your daily journey</p>
       </header>
 
-      <div className="flex justify-center mb-10 p-1.5 bg-[#F4F1EA] rounded-[30px] border border-[#E6E2D8] w-fit mx-auto">
+      <div className="flex justify-center mb-10 p-1.5 bg-[#F4F1EA] rounded-[30px] border border-[#E6E2D8] w-fit mx-auto overflow-x-auto max-w-full">
         <button 
           onClick={() => setActiveTab('tasbih')}
-          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all ${activeTab === 'tasbih' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
+          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'tasbih' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
         >
-          Tasbih Counter
+          Tasbih
+        </button>
+        <button 
+          onClick={() => setActiveTab('calendar')}
+          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'calendar' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
+        >
+          Calendar
+        </button>
+        <button 
+          onClick={() => setActiveTab('names')}
+          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'names' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
+        >
+          99 Names
+        </button>
+        <button 
+          onClick={() => setActiveTab('duas')}
+          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'duas' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
+        >
+          Daily Duas
         </button>
         <button 
           onClick={() => setActiveTab('cleaner')}
-          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all ${activeTab === 'cleaner' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
+          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'cleaner' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
         >
           Heart Cleaner
         </button>
+        <button 
+          onClick={() => setActiveTab('features')}
+          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'features' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
+        >
+          Features
+        </button>
+        <button 
+          onClick={() => setActiveTab('history')}
+          className={`px-6 py-3 rounded-[24px] text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'history' ? 'bg-[#7D8461] text-white shadow-md' : 'text-[#A49D8B] hover:text-[#7D8461]'}`}
+        >
+          Practice History
+        </button>
       </div>
 
-      <div className="bg-white rounded-[60px] border border-[#E6E2D8] p-8 md:p-12 shadow-sm min-h-[500px] flex flex-col items-center">
+      <div className="bg-white rounded-[60px] border border-[#E6E2D8] p-8 md:p-12 shadow-sm min-h-[500px] flex flex-col items-center w-full">
         <AnimatePresence mode="wait">
           {activeTab === 'tasbih' && (
             <motion.div 
@@ -137,6 +172,42 @@ export default function IslamicTools() {
             </motion.div>
           )}
 
+          {activeTab === 'calendar' && (
+            <motion.div 
+              key="calendar"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-full"
+            >
+              <IslamicCalendar />
+            </motion.div>
+          )}
+
+          {activeTab === 'names' && (
+            <motion.div 
+              key="names"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full"
+            >
+              <NamesOfAllah />
+            </motion.div>
+          )}
+
+          {activeTab === 'duas' && (
+            <motion.div 
+              key="duas"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full"
+            >
+              <Duas />
+            </motion.div>
+          )}
+
           {activeTab === 'cleaner' && (
             <motion.div 
               key="cleaner"
@@ -179,6 +250,29 @@ export default function IslamicTools() {
               <button className="mt-12 px-10 py-5 bg-[#7D8461] text-white rounded-[30px] font-bold shadow-lg hover:shadow-[#7D8461]/20 hover:scale-105 transition-all">
                 Start Daily Cleansing
               </button>
+            </motion.div>
+          )}
+
+          {activeTab === 'features' && (
+            <motion.div 
+              key="features"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full"
+            >
+              <FeaturesModule />
+            </motion.div>
+          )}
+          {activeTab === 'history' && (
+            <motion.div 
+              key="history"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full"
+            >
+              <RecitationHistory />
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,28 +1,49 @@
 import { GoogleGenAI } from "@google/genai";
 
 export const AIService = {
-  async analyzeAyah(arabicText: string, translation: string) {
+  async analyzeAyah(arabicText: string, translation: string, aspect: 'combined' | 'tajweed' | 'grammar' = 'combined', source: 'standard' | 'traditional' | 'technical' = 'standard') {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
-    const prompt = `You are an expert Quranic scholar and linguist. Analyze the following Quranic verse.
+    const sourceContext = {
+      standard: "expert Quranic scholar and linguist, drawing from modern educational standards",
+      traditional: "classical scholar, deeply rooted in the traditions of Ibn Kathir, Al-Jalalayn, and the Mu'tazilite/Ash'ari linguistic heritage",
+      technical: "academic computational linguist and phonology researcher focusing on semantic structure and exact acoustics"
+    }[source];
+
+    const aspectPrompt = {
+      combined: "Analyze the specific Tajweed rules AND the sentence structure/grammar of this verse in great detail.",
+      tajweed: "Focus EXCLUSIVELY on a deep Tajweed analysis. Ignore complex grammar unless it affects pronunciation. Detail every single rule application.",
+      grammar: "Focus EXCLUSIVELY on the linguistic breakdown (I'rab), semantic nuances, and word choice significance. Ignore Tajweed details."
+    }[aspect];
+
+    const prompt = `You are an ${sourceContext}. ${aspectPrompt}
     
     VERSE:
     Arabic: ${arabicText}
     Provided Translation: ${translation}
 
     TAJWEED ANALYSIS TASKS:
-    Explicitly check for and list the application of these specific Tajweed rules found in this verse:
-    1. Noon Sakinah & Tanween: Izhaar, Idghaam, Iqlaab, Ikhfaa.
-    2. Meem Sakinah: Ikhfaa Shafawi, Idghaam Shafawi, Izhaar Shafawi.
-    3. Madd (Prolongation): Madd Asli, Madd Muttasil, Madd Munfasil.
-    4. Qalqalah (Echoing): Letters ق ط ب ج د when static.
+    Identify and explain the specific Tajweed rules found in this verse. For each rule:
+    1. Identify the exact letter(s) and word where the rule applies.
+    2. Explain how the rule modifies the pronunciation (e.g., merging, echoing, nasalization depth).
+    Specifically check for: Noon Sakinah & Tanween, Meem Sakinah, Madd, and Qalqalah.
+
+    GRAMMAR AND CONTEXT TASKS:
+    1. Break down the sentence structure (I'rab basics).
+    2. Explain the linguistic significance of specific word choices (e.g., Why this specific verb form? Why this specific word order?).
+    3. Connect the grammatical structure to the overall meaning and context.
+
+    SOURCES:
+    Mention specific scholarly references (e.g., Al-Jazariyyah, Sībawayh, Al-Kashshaf) that reflect your "${source}" persona.
 
     OUTPUT SPECIFICATION:
+    IMPORTANT: Provide all text content in Bengali (বাংলা).
     Return ONLY a JSON object with these EXACT keys:
-    - "tajweedAndPronunciation": Detailed tajweed rules applied in this verse, specifically naming the rules (e.g., "Ikhfaa on letter X because of Y").
-    - "nuancedTranslation": A more refined English translation captruing deeper meaning.
-    - "grammarAndContext": Linguistic nuances and grammatical insights.
-    - "translationNuances": Explanation of why the suggested translation is more accurate.
+    - "tajweedAndPronunciation": Detailed tajweed rules in Bengali, formatted as a clear list. Mention exact characters and pronunciation tips. If aspect was 'grammar', return "Not requested".
+    - "nuancedTranslation": A more refined Bengali (বাংলা) translation capturing deeper meaning.
+    - "grammarAndContext": Detailed linguistic breakdown and grammatical significance in Bengali. Break it down into points. If aspect was 'tajweed', return "Not requested".
+    - "translationNuances": Explanation of why the suggested Bengali translation is more accurate.
+    - "analysisSources": List of specific references/sources in Bengali that justify this analysis from the perspective of a ${source} source.
 
     DO NOT include any text before or after the JSON.`;
 
@@ -52,17 +73,21 @@ export const AIService = {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
     const prompt = `You are a professional Tajweed teacher. Analyze this Quranic text: "${arabicText}".
+    Your goal is to provide a comprehensive "Recitation Analysis" for a student.
     
     TASKS:
-    1. Identify the most common pronunciation mistakes students make with THIS specific verse.
-    2. Provide specific "Practice Drills" for difficult transitions or letters in this verse.
-    3. Highlight which words require extra attention to avoid skipping or merging incorrectly.
+    1. Identify the most common pronunciation mistakes (Makharij) students make with THIS specific verse.
+    2. List all the key Tajweed rules applied in this verse (e.g., Ikhfaa, Idghaam, Qalqalah) and explain exactly how to perform them here.
+    3. Identify "Potential Difficulty Areas" - words or transitions that are particularly tricky for beginners.
+    4. Provide specific "Practice Drills" for this verse.
     
     OUTPUT SPECIFICATION:
+    IMPORTANT: Provide all text content in Bengali (বাংলা).
     Return ONLY a JSON object with these EXACT keys:
-    - "commonMistakes": [ { "pitfall": "string", "howToAvoid": "string" } ]
-    - "practiceDrills": [ "string" ]
-    - "focusWords": [ { "word": "string", "reason": "string" } ]
+    - "pronunciationFeedback": [ { "point": "string", "explanation": "string in BENGALI" } ]
+    - "tajweedRulesApplied": [ { "rule": "string", "application": "Detailed explanation of which word/letter and how to pronounce in BENGALI" } ]
+    - "difficultAreas": [ { "word": "string (arabic)", "reason": "string in BENGALI" } ]
+    - "practiceDrills": [ "string in BENGALI" ]
 
     DO NOT include any text before or after the JSON.`;
 
@@ -79,29 +104,50 @@ export const AIService = {
     } catch (error) {
       console.error("Recitation Guide Error:", error);
       return { 
-        commonMistakes: [],
-        practiceDrills: ["Focus on clear pronunciation of each letter."],
-        focusWords: []
+        pronunciationFeedback: [],
+        tajweedRulesApplied: [],
+        difficultAreas: [],
+        practiceDrills: ["প্রতিটি অক্ষরের স্পষ্ট উচ্চারণের দিকে মনোযোগ দিন।"]
       };
     }
   },
 
-  async analyzeRecitation(audioBase64: string, arabicText: string, mimeType: string = "audio/webm") {
+  async analyzeRecitation(audioBase64: string, arabicText: string, mimeType: string = "audio/webm", strict: boolean = false) {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
-    const prompt = `You are an expert Tajweed coach. Compare the recorded recitation (audio) with the following Quranic text: "${arabicText}".
+    const prompt = strict 
+      ? `You are an ELITE Tajweed auditor. Your ONLY task is to identify errors (mistakes) in the recitation compared to: "${arabicText}".
+    
+    CRITICAL FOCUS: 
+    - Be extremely strict. 
+    - Identify every tiny slip in pronunciation, Tajweed (Ghunnah, Madd, Qalqalah), or pausing.
+    - If the user skips even one small vowel sound (Harakat), flag it.
+    - Focus ONLY on what was WRONG.
+    
+    OUTPUT SPECIFICATION:
+    IMPORTANT: All text in 'feedback' and 'overallFeedback' MUST be in Bengali (বাংলা).
+    Return ONLY a JSON object with these EXACT keys:
+    - "accuracyScore": (0-100)
+    - "mistakes": [ { "word": "string (arabic)", "type": "pronunciation/tajweed/skipping", "feedback": "Detailed explanation of why it is wrong and how to fix it in BENGALI" } ]
+    - "overallFeedback": "A concise summary of ONLY the errors found in BENGALI"
+    
+    If there are no mistakes, return empty mistakes array.
+    DO NOT include any text before or after the JSON.`
+      : `You are an expert Tajweed coach. Your primary goal is to find mistakes in the recitation compared to the perfect Arabic text: "${arabicText}".
     
     TASKS:
     1. Identify pronunciation mistakes (Makharij).
-    2. Identify Tajweed rule mistakes.
-    3. Identify missing or added words.
+    2. Identify Tajweed rule mistakes (Ghunnah, Madd, Qalqalah, etc.).
+    3. Identify missing words, added words, or incorrectly substituted words.
     
     OUTPUT SPECIFICATION:
+    IMPORTANT: All text in 'feedback' and 'overallFeedback' MUST be in Bengali (বাংলা).
     Return ONLY a JSON object with these EXACT keys:
     - "accuracyScore": (0-100)
-    - "mistakes": [ { "word": "string", "type": "pronunciation/tajweed/skipping", "feedback": "string" } ]
-    - "overallFeedback": "string summary"
+    - "mistakes": [ { "word": "string (arabic)", "type": "pronunciation/tajweed/skipping", "feedback": "Detailed explanation of why it is wrong and how to fix it in BENGALI" } ]
+    - "overallFeedback": "A concise summary of the performance in BENGALI"
 
+    If there are no mistakes, the 'mistakes' array should be empty.
     DO NOT include any text before or after the JSON.`;
 
     try {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Book, GraduationCap, Brain, Search, Menu, X, Settings as SettingsIcon, Clock, Sparkles as ToolsIcon } from 'lucide-react';
+import { Book, GraduationCap, Brain, Search, Menu, X, Settings as SettingsIcon, Clock, Sparkles, CalendarDays } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SurahList from './components/SurahList';
 import QuranReader from './components/QuranReader';
@@ -10,6 +10,8 @@ import SearchResults from './components/SearchResults';
 import Settings from './components/Settings';
 import PrayerTimes from './components/PrayerTimes';
 import IslamicTools from './components/IslamicTools';
+import IslamicCalendar from './components/IslamicCalendar';
+import Home from './components/Home';
 
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -33,16 +35,18 @@ export default function App() {
           <div className="flex flex-col items-center h-full py-8">
             <div className="mb-10 block">
                <div className="w-12 h-12 bg-[#7D8461] rounded-full flex items-center justify-center text-white shadow-md">
-                 <Book size={24} />
+                 <Link to="/"><Book size={24} /></Link>
                </div>
             </div>
 
             <nav className="flex-1 flex flex-col space-y-6 overflow-y-auto w-full items-center custom-scrollbar">
-              <NavLink to="/" icon={<Book size={22} />} label="Reading" onClick={() => setIsSidebarOpen(false)} />
+              <NavLink to="/" icon={<Sparkles size={22} />} label="Home" onClick={() => setIsSidebarOpen(false)} />
+              <NavLink to="/reading" icon={<Book size={22} />} label="Quran" onClick={() => setIsSidebarOpen(false)} />
               <NavLink to="/tajweed" icon={<GraduationCap size={22} />} label="Tajweed" onClick={() => setIsSidebarOpen(false)} />
               <NavLink to="/memorize" icon={<Brain size={22} />} label="Hifz" onClick={() => setIsSidebarOpen(false)} />
+              <NavLink to="/calendar" icon={<CalendarDays size={22} />} label="Calendar" onClick={() => setIsSidebarOpen(false)} />
               <NavLink to="/prayer-times" icon={<Clock size={22} />} label="Prayers" onClick={() => setIsSidebarOpen(false)} />
-              <NavLink to="/tools" icon={<ToolsIcon size={22} />} label="Tools" onClick={() => setIsSidebarOpen(false)} />
+              <NavLink to="/tools" icon={<Sparkles size={22} />} label="Tools" onClick={() => setIsSidebarOpen(false)} />
               <NavLink to="/search" icon={<Search size={22} />} label="Search" onClick={() => setIsSidebarOpen(false)} />
             </nav>
 
@@ -75,10 +79,12 @@ export default function App() {
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto relative p-6 md:p-10">
           <Routes>
-            <Route path="/" element={<SurahList />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/reading" element={<SurahList />} />
             <Route path="/surah/:number" element={<QuranReader />} />
             <Route path="/tajweed" element={<TajweedGuide />} />
             <Route path="/memorize" element={<MemorizationTool />} />
+            <Route path="/calendar" element={<div className="max-w-4xl mx-auto"><div className="mb-12 text-center text-[#5A5A40]"><h2 className="text-4xl font-serif font-bold">Islamic Calendar</h2><p className="text-[#A49D8B] mt-2">Hijri dates and important events</p></div><IslamicCalendar /></div>} />
             <Route path="/prayer-times" element={<PrayerTimes />} />
             <Route path="/tools" element={<IslamicTools />} />
             <Route path="/search" element={<SearchResults />} />

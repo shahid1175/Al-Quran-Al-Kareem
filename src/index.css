@@ -31,3 +31,31 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: 1rem;
 }
+
+.tafsir-content p {
+  margin-bottom: 0.75rem;
+}
+
+.tafsir-content sup {
+  font-size: 0.65rem;
+  color: var(--primary);
+  vertical-align: super;
+  margin-left: 1px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #E6E2D8;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #D1CCBF;
+}

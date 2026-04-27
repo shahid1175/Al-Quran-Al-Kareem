@@ -76,5 +76,28 @@ export const QuranService = {
     const response = await fetch(`${BASE_URL}/edition?format=audio&language=ar`);
     const data = await response.json();
     return data.data;
+  },
+
+  BENGALI_TAFSIRS: [
+    { id: 161, name: 'Tafsir Ibn Kathir (ইবনে কাসীর)', slug: 'bn-tafsir-ibn-kasir' },
+    { id: 168, name: 'Tafheem-ul-Quran (তাফহীমুল কুরআন)', slug: 'bn-tafheem-ul-quran' },
+    { id: 169, name: 'Fi Zilal al-Quran (ফি জিলালিল কুরআন)', slug: 'bn-fi-zilal-al-quran' },
+    { id: 162, name: 'Ahsanul Bayaan (আহসানুল বায়ান)', slug: 'bn-ahsanul-bayaan' },
+    { id: 163, name: 'Fathul Majeed (ফাতহুল মাজীদ)', slug: 'bn-fathul-majeed' }
+  ],
+
+  async getTafsir(surahNumber: number, ayahNumber: number, tafsirId?: number): Promise<string> {
+    try {
+      const id = tafsirId || parseInt(localStorage.getItem('preferred_tafsir') || '161');
+      const response = await fetch(`https://api.quran.com/api/v4/tafsirs/${id}/by_ayah/${surahNumber}:${ayahNumber}`);
+      const data = await response.json();
+      if (data && data.tafsir) {
+        return data.tafsir.text;
+      }
+      return 'তাফসীর বর্তমানে পাওয়া যাচ্ছে না। (Tafsir currently unavailable)';
+    } catch (error) {
+      console.error('Error fetching tafsir:', error);
+      return 'তাফসীর বর্তমানে পাওয়া যাচ্ছে না। (Tafsir currently unavailable)';
+    }
   }
 };
